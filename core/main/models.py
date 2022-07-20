@@ -23,6 +23,20 @@ class Post(models.Model):
     is_published = models.BooleanField(default=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='post', related_name='posts')
     user = models.ForeignKey(User, verbose_name='user', on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=13, decimal_places=2)
+    img = models.ImageField()
+    status = models.CharField(max_length=100, blank=True, choices=(('Owner', 'Owner'),
+                                                                   ('Organization', 'Organization')))
+    type = models.CharField(max_length=100, blank=True, choices=(('For sale', 'For sale'),
+                                                                 ('Giveaway', 'Giveaway'),
+                                                                 ('Wanted', 'Wanted'),
+                                                                 ('Exchange', 'Exchange')))
+    location = models.CharField(max_length=100, blank=True, choices=(('Yerevan', 'Yerevan'),
+                                                                     ('Lori', 'Lori'),
+                                                                     ('Tavush', 'Tavush'),
+                                                                     ('Armavir', 'Armavir')))
+    condition = models.CharField(max_length=100, blank=True, choices=(('New', 'New'),
+                                                                      ('Used', 'Used')))
 
     def __str__(self):
         return self.title
