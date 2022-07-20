@@ -1,13 +1,46 @@
 from rest_framework import serializers
-from .models import Post
-
+from .models import Post, Category
 
 
 class PostSerializers(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Post
         fields = "__all__"
+
+
+class CategorySerializer(serializers.ModelSerializer):
+
+    subcategories = serializers.SerializerMethodField(
+        read_only=True, method_name="get_child_categories")
+    posts = PostSerializers(many=True)
+
+    class Meta:
+        model = Category
+        fields = [
+            'title',
+            'subcategories',
+            'posts'
+        ]
+
+    def get_child_categories(self, obj):
+
+        serializer = CategorySerializer(
+            instance=obj.category.all(),
+            many=True
+        )
+        return serializer.data
+
+
+# class CategorySerializers(serializers.ModelSerializer):
+#     category = serializers.StringRelatedField(many=True)
+#     posts = serializers.StringRelatedField(many=True)
+#
+#     class Meta:
+#
+#         model = Category
+#         fields = ['title', 'category', 'posts']
 
 
 

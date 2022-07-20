@@ -1,8 +1,6 @@
-import imp
-from lib2to3.pgen2.grammar import opmap
 from .models import Post, Category
-from .serializers import PostSerializers
-from rest_framework import generics
+from .serializers import PostSerializers, CategorySerializer
+from rest_framework import generics, filters
 from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -20,18 +18,32 @@ from rest_framework.pagination import PageNumberPagination
 #         cats = Category.objects.all()
 #         return Response({'cats': [c.name for c in cats]})
 
+class CategoryAPIListPagination(PageNumberPagination):
+    page_size = 1
+    page_size_query_param = 'page_size'
+    max_page_size = 10000
 
-class PostAPIListPaginaton(PageNumberPagination):
-    page_size = 3
+
+class CategoryApiList(generics.ListCreateAPIView):
+    queryset = Category.objects.filter(parent=None)
+    serializer_class = CategorySerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    pagination_class = CategoryAPIListPagination
+
+
+class PostAPIListPagination(PageNumberPagination):
+    page_size = 2
     page_size_query_param = 'page_size'
     max_page_size = 10000
 
 
 class PostApiList(generics.ListCreateAPIView):
+    search_fields = ['title', 'content']
+    filter_backends = (filters.SearchFilter,)
     queryset = Post.objects.all()
     serializer_class = PostSerializers
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    pagination_class = PostAPIListPaginaton
+    pagination_class = PostAPIListPagination
 
 
 class PostAPIUpdate(generics.RetrieveUpdateAPIView):
@@ -44,7 +56,6 @@ class PostAPIDestroy(generics.RetrieveDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializers
     permission_classes = (IsAdminOrReadOnly,)
-
 
 # class PostApiView(APIView):
 #     def get(self, request):
@@ -81,6 +92,3 @@ class PostAPIDestroy(generics.RetrieveDestroyAPIView):
 #         post = Post.objects.get(pk=pk)
 #         post.delete()
 #         return Response({'post': 'delete post ' + str(pk)})
-        
-
-
